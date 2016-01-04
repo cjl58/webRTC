@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="Jialei Cheng">
+    <link rel="icon" href="img/missioncontrolIcon.png">
+
+    <title>Mission Control</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/vis.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            padding-top: 100px;
+        }
+
+        #network {
+            width: 100%;
+            height: 600px;
+        }
+
+        .row {
+            margin-top: 10px;
+            margin-bottom: 10px;
+        }
+
+        .well {
+            margin-bottom: 0;
+        }
+
+        .network-health-group{
+            width: 2%;
+            background-color: #AABBAA;
+            display: inline-block;
+            border-color: #AAAAAA;
+            border-style: solid;
+            border-width: 1px 1px 1px 0;
+        }
+        @media (max-width: 768px) {
+            .network-health-group{
+                width: 3%;
+            }
+        }
+
+        @media (min-width: 970px) {
+            .network-health-group{
+                width: 1%;
+            }
+        }
+        div.footer {
+            border-top: 1px solid #AAA;
+             color: #777;
+             margin-top: 19px;
+            padding-top: 5px;
+         }
+        div.footer a{
+            color: #777;
+
+        }
+        .footer img{
+            border-right: 2px solid #AAA;
+            margin-right: 5px;
+            padding-right: 5px;
+        }
+
+        .list-group-item .progress{
+            padding-right: 0px;
+            padding-left: 0px;
+        }
+
+    </style>
+
+  </head>
+
+  <body>
+
+    <nav class="navbar navbar-inverse navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Storage-WebRTC</a>
+        </div>
+        <div id="navbar" class="collapse navbar-collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Mission Control</a></li>
+            <li><a href="cloudPeer.html" target="view_window">Storage Peer</a></li>  
+          </ul>
+        </div>
+      </div>
+    </nav>
+    
+    <div class="panel panel-success">
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-3 col-md-3">
+            <div class="well well-sm">Online Peers: <span id="PeerCount">0</span></div>
+          </div>
+          <div class="col-sm-3 col-md-3">
+            <div class="well" id="idWell"></div>
+
+          </div>  
+
+          <!-- send message button for test -->    
+          <div class="col-sm-3 col-md-3">
+            <button type="button" class="btn btn-success" id="connectToCloud">Connect To Cloud</button>
+            <button type="button" class="btn btn-success" id="sendMessage">Send Message To Cloud</button>
+          </div>      
+        </div>
+      </div>
+    </div>
+
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <button type="button" class="btn btn-success" id="Uploader">Uploader</button>
+      </div>
+      <div class="panel-body">
+        <div class="row">
+          <div class="col-sm-3 col-md-3">
+            <span class="file-input btn btn-default btn-file">
+              <input type="file" id="fileInput" name="files" multiple/>
+              <output id="list"></output>
+            </span>
+          </div>
+          <div class="col-sm-3 col-md-2">
+                <div class="input-group">
+                    <span class="input-group-addon" id="basic-addon1">Coding Method:</span>
+                    <button type="button" id="stateButton" class="btn btn-default dropdown-toggle "
+                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                aria-describedby="basic-addon1">
+                            <span id="stateText">Action</span> <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a id="code_none" href="#" data-state="CODE_NONE">Without coding</a></li>
+                        <li><a id="code_rs" href="#" data-state="CODE_RS">Reed Solomon</a></li>
+                        <li><a id="code_rlnc" href="#" data-state="CODE_RLNC">RLNC</a></li>
+                    </ul>
+                </div>
+          </div>
+          
+          <div class="col-sm-3 col-md-3">
+            <div class="well well-sm">File Size: <span id="FileSize">0</span></div>
+          </div>
+        </div>
+        <div>
+          <button type="button" class="btn btn-default" id="SplitFile">start to split the file</button>
+          <div class="progress">
+            <div id="splitfile" class="progress-bar progress-bar-striped" role="progressbar">
+                  40%
+            </div>
+          </div>
+        </div>
+        <div>
+          <button id="StartToUpload" class="btn btn-default">Start to upload the file</button>
+          <div class="progress">
+            <div id="sendProgress" class="progress-bar progress-bar-striped" role="progressbar">
+                60%
+            </div>
+          </div>
+        </div>  
+      </div>
+    </div>
+    <div class="panel panel-success">
+      <div class="panel-heading">
+        <button type="button" class="btn btn-success" id="Download">Downloader</button>
+      </div>
+      <div class="panel-body">
+          <div class="row">
+              <ul id="downloadList" class="list-group">
+                  <!-- <li class="list-group-item">
+                      <div>insert file name</div>
+                      <div class="row">
+                          <div class="progress col-sm-8 col-sm-offset-1">
+                              <div id="splitfile" class="progress-bar progress-bar-striped" role="progressbar"></div>
+                          </div>
+                          <div class="col-sm-3">
+                            <button type="button" class="btn btn-success">Download</button>
+                          </div>
+                      </div>
+                      
+                  </li> -->
+              </ul>
+          </div>
+        <!-- <button type="button" class="btn btn-default" id="DownloadFile">start to download the file</button>
+        <div class="progress">
+          <div id="downloadfile" class="progress-bar progress-bar-striped" role="progressbar"></div>
+        </div> -->
+      </div>
+    </div>
+    <div class="panel panel-default">
+      <div class="panel-body">
+          <div id="network"></div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-sm-12">
+          <div class="input-group">
+              <span class="input-group-addon" id="basic-addon3">GraphPhysics:</span>
+              <button id="enableGraphPhysics" type="button" class="btn btn-default active btn-success" aria-describedby="basic-addon3">
+                On
+              </button>
+          </div>
+      </div>
+    </div>
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="js/lib/jquery-2.1.4.min.js"></script>
+    <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
+    <script src="js/lib/bootstrap.min.js"></script>
+<!--<script src="js/lib/vis.min.js"></script>
+    <script src="js/lib/knockout.js"></script>
+    <script src="js/lib/knockout.mapping.js"></script> -->
+    <script src="js/lib/adapter.js"></script>
+    <script src="js/object/peer.js"></script>
+    <script src="js/object/missionPeer.js"></script>
+
+<!--<script src="js/storagePeer/SignalerConnector.js"></script>
+    <script src="js/storagePeer/WebRTCConnector.js"></script>
+    <script src="js/storagePeer/Constraints.js"></script> -->
+
+    <script type="text/javascript">
+
+    //var fileInput = document.querySelector('input#fileInput');
+    //var sendProgress = document.querySelector('div#sendProgress');
+    //var FileSize = document.querySelector('span#FileSize');
+
+    var SendMessage = document.getElementById('sendMessage');
+    var Uploader = document.getElementById('Uploader');
+    var StartToUpload = document.getElementById('StartToUpload');
+    var PeerCount = document.getElementById('PeerCount');
+
+    var ConnectToCloud = document.getElementById('connectToCloud');
+    var Downloader = document.getElementById('Download');
+    // daten visual units
+    var sendProgress = $('#sendProgress');
+    var fileSize = $('#FileSize');
+    var DownloadList = $('#downloadList');
+
+    var missionPeer = new RtcMissionPeer();
+
+    missionPeer.connectToServer();
+
+    function updateUploadFileProcess(percent){
+        var progress = Math.ceil(percent) + "%";
+        sendProgress.width(progress);
+        sendProgress.text(progress);
+    }
+
+    function updateDownloadFileProcess(percent, sendId){
+        var progress = Math.ceil(percent) + "%";
+        var downloadProgress = $('#'+sendId+ '-progress');
+        downloadProgress.width(progress);
+        downloadProgress.text(progress);
+    }
+
+    function updateDownloadList(downloadList, socketId){
+        //<button type=\"button\" id=\""+fileInfo.sendId+"\" class=\"btn btn-success\">Download</button>
+        DownloadList.empty();
+        for(var i = 0 ; i < downloadList.length; i++){
+            var fileInfo = downloadList[i];
+            var progressbar = "<div class=\"row\"><div class=\"progress col-sm-9 col-sm-offset-1\"><div id=\""+fileInfo.sendId+"-progress\" class=\"progress-bar progress-bar-striped\" role=\"progressbar\"></div></div><div class=\"col-sm-2\"><button value=\""+fileInfo.sendId+"\" class=\"btn btn-success\">Download</button></div></div>";
+            var text = '<div>Click to download \'' + fileInfo.name + '\' (' + fileInfo.size +' bytes)</div>';
+
+            var listitem = '<li class=\"list-group-item\">' + text + progressbar + '</a></li>';
+
+            DownloadList.append(listitem);
+
+            console.log("list item: ", downloadList[i]);
+        }
+
+        $("#downloadList").on( "click", "button", function() {
+            var sendId = $(this).val();
+
+            missionPeer.sendSelectedFileId(downloadList, sendId, socketId);
+            //alert(sendId + "----" + socketId);
+        });
+    }
+
+    
+
+   
+
+    ConnectToCloud.onclick = function(event){
+      //分享文件
+      missionPeer.connectToCloud();
+      console.log("check type : " + (missionPeer instanceof RtcMissionPeer));
+    };
+
+    Downloader.onclick = function(){
+      missionPeer.askCloudToDownloadFile();
+    }
+
+    SendMessage.onclick = function(){
+      // send test message to the cloud for test
+      missionPeer.broadcast("Test message successful access to the cloud !");
+    };
+
+    StartToUpload.onclick = function(){
+      // start to upload the file to the cloud and wait for the response
+      missionPeer.shareFile("fileInput");
+    }
+
+    </script>
+
+
+
+
+    
+  </body>
+</html>
